@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { app, BrowserWindow, ipcMain, Menu, MenuItemConstructorOptions } from 'electron';
 import cluster from 'cluster';
 import { initDirWorker } from './test/test';
+import fs from 'fs';
 
 const remoteMain = require('@electron/remote/main');
 
@@ -58,6 +59,17 @@ function createWindow() {
         },
         icon: !app.isPackaged ? path.join(process.cwd(), `public/${iconName}`) : path.join(__dirname, `../build/${iconName}`),
     });
+
+    try {
+        console.log(app.getPath('desktop'));
+        const logPath = path.join(app.getPath('desktop'), `caspian-log-${Date.now() / 1000}.log`);
+        console.log(logPath);
+        const logStream = fs.createWriteStream(logPath);
+        logStream.write('Test');
+        logStream.close();
+    } catch (err) {
+        console.error(err);
+    }
 
     cluster.setupPrimary({
         exec: __dirname + '/TestWorker.js',
